@@ -15,7 +15,9 @@
 # Find ATL stuff
 
 if (NOT VC_DIR)
-    if (MSVC11)
+    if (MSVC12)
+        GET_FILENAME_COMPONENT(VS_DIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0\\Setup\\VS;ProductDir]" REALPATH CACHE)
+    elseif (MSVC11)
         GET_FILENAME_COMPONENT(VS_DIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VS;ProductDir]" REALPATH CACHE)
     elseif (MSVC10)
         GET_FILENAME_COMPONENT(VS_DIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VS;ProductDir]" REALPATH CACHE)
@@ -305,6 +307,8 @@ function (create_cab PROJNAME DDF CAB_SOURCEFILES CAB_OUTDIR PROJDEP)
     else()
         SET (CAB_DEST ${CAB_OUTDIR}/${PROJNAME}.cab)
     endif()
+	
+	FILE(RELATIVE_PATH CAB_NAME ${CAB_OUTDIR} ${CAB_DEST})
      
     if (NOT FB_CAB_SUFFIX)
         set (FB_CAB_SUFFIX _Cab)
@@ -313,7 +317,7 @@ function (create_cab PROJNAME DDF CAB_SOURCEFILES CAB_OUTDIR PROJDEP)
     ADD_LIBRARY(${PROJNAME}${FB_CAB_SUFFIX} STATIC ${WIX_SOURCES})
     ADD_CUSTOM_COMMAND( TARGET    ${PROJNAME}${FB_CAB_SUFFIX} POST_BUILD
         COMMAND   ${CMAKE_MAKECAB}
-        ARGS      /D "OUTDIR=${CAB_OUTDIR}" /F "${CAB_DDF}"
+        ARGS      /D "OUTDIR=${CAB_OUTDIR}" /D "NAME=${CAB_NAME}" /F "${CAB_DDF}"
         DEPENDS   ${SOURCELIST}
         COMMENT   "Create Cab ${CAB_DEST}"
         )
